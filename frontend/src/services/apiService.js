@@ -40,11 +40,13 @@ export const getCurrentUser = async () => {
 };
 
 export const createPost = async (postData) => { // { title, content, image_url? }
-  return apiClient.post('/posts/', postData); // Path matches backend: /api/v1/posts/
+  // Corrected: Removed trailing slash from '/posts/' to match backend route '/api/v1/posts'
+  return apiClient.post('/posts', postData); // Path matches backend: /api/v1/posts
 };
 
 export const getPosts = async (page = 1, limit = 10) => {
-  return apiClient.get('/posts/', { params: { skip: (page - 1) * limit, limit: limit } }); // Path matches backend: /api/v1/posts/
+  // Corrected: Removed trailing slash from '/posts/' to match backend route '/api/v1/posts'
+  return apiClient.get('/posts', { params: { skip: (page - 1) * limit, limit: limit } }); // Path matches backend: /api/v1/posts
 };
 
 export const getPostById = async (postId) => {
