@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Annotated
 
-from app import crud, schemas, auth, models
-from app.database import get_db
+from .. import crud, schemas, auth, models
+from ..database import get_db
 
 router = APIRouter(
-    prefix="/posts",  # Corrected: To integrate with main.py's app.include_router(..., prefix="/api/v1")
+    prefix="/posts",
     tags=["posts"],
 )
 
@@ -26,8 +26,8 @@ def create_post_endpoint(
 
 @router.get("", response_model=List[schemas.PostList])
 def read_posts_endpoint(
-    skip: int = 0,
-    limit: int = 20, # Default to 20 posts per page
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100), # Default to 20, max 100 posts per page
     db: Session = Depends(get_db)
 ):
     """
@@ -86,13 +86,13 @@ def delete_post_endpoint(
     if db_post.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this post")
     crud.delete_post(db=db, db_post=db_post) 
-    return # FastAPI handles 204 response automatically when no content is returned and status_code is set
+    return # FastAPI handles 204 response automatically
 
 @router.get("/user/{user_id}", response_model=List[schemas.PostList])
 def read_posts_by_user_endpoint(
     user_id: int,
-    skip: int = 0,
-    limit: int = 10,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
     """

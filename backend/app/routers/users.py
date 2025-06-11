@@ -1,13 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List, Annotated
 
-from app import crud, schemas, auth, models
-from app.database import get_db
+from .. import crud, schemas, auth, models
+from ..database import get_db
 
 router = APIRouter(
-    prefix="/api/v1/users",
+    prefix="/users",  # Corrected: To integrate with main.py's app.include_router(..., prefix="/api/v1")
     tags=["users"],
 )
 
@@ -40,7 +40,7 @@ def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depen
     Uses OAuth2PasswordRequestForm, so expects 'username' and 'password' in form data.
     The 'username' field can be either the actual username or the email.
     """
-    user = auth.authenticate_user(db, username=form_data.username, password=form_data.password)
+    user = auth.authenticate_user(db, username_or_email=form_data.username, password=form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -101,10 +101,10 @@ def read_user_by_id(user_id: int, db: Session = Depends(get_db)):
 
 @router.get("", response_model=List[schemas.UserMinimal])
 def read_users(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=200),
     db: Session = Depends(get_db)
-    # current_user: models.User = Depends(auth.get_current_active_user) # Uncomment for admin-only access
+    # current_user: Annotated[models.User, Depends(auth.get_current_active_user)] # Uncomment for admin-only access
 ):
     """
     Retrieve a list of users (minimal public information).
