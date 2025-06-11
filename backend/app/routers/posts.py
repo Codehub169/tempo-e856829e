@@ -13,8 +13,8 @@ router = APIRouter(
 @router.post("", response_model=schemas.Post, status_code=status.HTTP_201_CREATED)
 def create_post_endpoint(
     post_in: schemas.PostCreate,
-    db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(auth.get_current_active_user)]
+    current_user: Annotated[models.User, Depends(auth.get_current_active_user)],
+    db: Session = Depends(get_db)
 ):
     """
     Create a new blog post.
@@ -55,8 +55,8 @@ def read_post_endpoint(
 def update_post_endpoint(
     post_id: int,
     post_in: schemas.PostUpdate,
-    db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(auth.get_current_active_user)]
+    current_user: Annotated[models.User, Depends(auth.get_current_active_user)],
+    db: Session = Depends(get_db)
 ):
     """
     Update an existing blog post.
@@ -72,8 +72,8 @@ def update_post_endpoint(
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post_endpoint(
     post_id: int,
-    db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(auth.get_current_active_user)]
+    current_user: Annotated[models.User, Depends(auth.get_current_active_user)],
+    db: Session = Depends(get_db)
 ):
     """
     Delete a blog post.
@@ -86,7 +86,7 @@ def delete_post_endpoint(
     if db_post.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this post")
     crud.delete_post(db=db, db_post=db_post) 
-    return # FastAPI handles 204 response automatically when no content is returned
+    return # FastAPI handles 204 response automatically when no content is returned and status_code is set
 
 @router.get("/user/{user_id}", response_model=List[schemas.PostList])
 def read_posts_by_user_endpoint(

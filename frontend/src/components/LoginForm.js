@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, FormControl, FormLabel, Input, Button, VStack, Text, Link as ChakraLink, useToast, FormErrorMessage, InputGroup, InputRightElement } from '@chakra-ui/react';
+import { Box, FormControl, FormLabel, Input, Button, VStack, Text, Link as ChakraLink, FormErrorMessage, InputGroup, InputRightElement } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -10,7 +10,7 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false); // isLoading from useAuth is for global auth state, this is for form submission
   const [errors, setErrors] = useState({});
   const { login } = useAuth();
-  const toast = useToast(); // Keep local toast for form-specific or unexpected errors
+  // AuthContext handles login-related toasts.
 
   const validateForm = () => {
     const newErrors = {};
@@ -54,7 +54,6 @@ const LoginForm = () => {
               value={identifier} 
               onChange={(e) => setIdentifier(e.target.value)} 
               placeholder="you@example.com or username"
-              borderColor={errors.identifier ? 'red.500' : 'inherit'}
               autoComplete="username"
             />
             {errors.identifier && <FormErrorMessage>{errors.identifier}</FormErrorMessage>}
@@ -70,7 +69,6 @@ const LoginForm = () => {
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
                 placeholder="••••••••"
-                borderColor={errors.password ? 'red.500' : 'inherit'}
                 autoComplete="current-password"
               />
               <InputRightElement width="4.5rem">
@@ -96,7 +94,7 @@ const LoginForm = () => {
 
           <Text textAlign="center" fontSize="sm">
             Don't have an account?{' '}
-            <ChakraLink as={RouterLink} to="/register" color="primary" fontWeight="500">
+            <ChakraLink as={RouterLink} to="/register" color="primary.500" fontWeight="500">
               Register
             </ChakraLink>
           </Text>
