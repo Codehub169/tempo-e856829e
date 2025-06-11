@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --primary-color: #3498db; /* Peter River */
+    --secondary-color: #ecf0f1; /* Clouds */
+    --accent-color: #e74c3c; /* Alizarin */
+    --text-color: #2c3e50; /* Wet Asphalt */
+    --light-text-color: #58697a; /* Lighter Wet Asphalt/Silver mix */
+    --border-color: #bdc3c7; /* Silver */
+    --card-bg-color: #f8f9fa; /* Lightest background/cards */
+    --white-color: #ffffff;
+    --success-color: #2ecc71; /* Emerald */
+    --warning-color: #f39c12; /* Orange */
+    --error-color: #e74c3c; /* Alizarin (same as accent) */
+
+    --font-primary: 'Inter', sans-serif;
+    --font-secondary: 'Lora', serif;
+}
+
+body {
+    font-family: var(--font-primary);
+    color: var(--text-color);
+    background-color: var(--secondary-color);
+    line-height: 1.6;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    flex-grow: 1;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
