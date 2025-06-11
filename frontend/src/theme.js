@@ -138,6 +138,8 @@ const components = {
           }
         // Default solid variant (e.g., for colorScheme='gray', 'green', 'orange')
         // Chakra UI will look up `${props.colorScheme}.500` and `${props.colorScheme}.600` in `theme.colors`
+        // This requires that color schemes like 'green', 'orange', 'gray' etc. are defined
+        // as top-level keys in the `colors` object above, which they are.
         return {
             bg: `${props.colorScheme}.500`,
             color: colors.white,
@@ -161,12 +163,12 @@ const components = {
   },
   Input: {
     defaultProps: {
-      focusBorderColor: 'blue.500', 
+      focusBorderColor: 'blue.500', // Refers to colors.blue[500]
     },
   },
   Textarea: {
     defaultProps: {
-      focusBorderColor: 'blue.500', 
+      focusBorderColor: 'blue.500', // Refers to colors.blue[500]
     },
   },
   Container: {
