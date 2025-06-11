@@ -8,13 +8,13 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const bgColor = useColorModeValue('white', 'gray.800');
-  const textColor = useColorModeValue('brand.text', 'whiteAlpha.900');
-  const activeLinkColor = useColorModeValue('brand.primary', 'brand.primary'); // Assuming brand.primary is defined in theme
+  const activeLinkColor = useColorModeValue('primary', 'primary'); // 'primary' is a direct key from theme
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const navItemColor = useColorModeValue('text', 'whiteAlpha.900'); // 'text' is a direct key from theme
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate('/login'); // Navigate after logout completes
   };
 
   const NavItem = ({ to, children }) => (
@@ -27,6 +27,7 @@ const Navbar = () => {
         _activeLink={{ color: activeLinkColor, fontWeight: "bold" }}
         px={2}
         py={1}
+        color={navItemColor}
       >
         {children}
       </ChakraLink>
@@ -34,7 +35,16 @@ const Navbar = () => {
   );
 
   return (
-    <Box bg={bgColor} boxShadow="sm" py={4} position="sticky" top={0} zIndex={1000} borderBottom="1px" borderColor={borderColor}>
+    <Box 
+      bg={bgColor} 
+      boxShadow="sm" 
+      py={4} 
+      position="sticky" 
+      top={0} 
+      zIndex={1000} 
+      borderBottom="1px" 
+      borderColor={borderColor}
+    >
       <Flex
         maxW={{ base: '90%', md: '1100px' }}
         mx="auto"
@@ -42,7 +52,7 @@ const Navbar = () => {
         justifyContent="space-between"
       >
         <ChakraLink as={NavLink} to="/" _hover={{ textDecoration: 'none' }}>
-          <Text fontFamily="heading" fontSize={{ base: '1.5rem', md: '1.8rem' }} fontWeight="700" color="brand.primary">
+          <Text fontFamily="heading" fontSize={{ base: '1.5rem', md: '1.8rem' }} fontWeight="700" color="primary">
             SimpleBlog
           </Text>
         </ChakraLink>
@@ -53,7 +63,7 @@ const Navbar = () => {
               <>
                 <NavItem to="/create-post">Create Post</NavItem>
                 <ListItem>
-                  <Button onClick={handleLogout} variant="ghost" colorScheme="brandPrimary" size="sm" fontWeight="500">
+                  <Button onClick={handleLogout} variant="ghost" colorScheme="primary" size="sm" fontWeight="500">
                     Logout
                   </Button>
                 </ListItem>

@@ -2,29 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-    --primary-color: #3498db; /* Peter River */
-    --secondary-color: #ecf0f1; /* Clouds */
-    --accent-color: #e74c3c; /* Alizarin */
-    --text-color: #2c3e50; /* Wet Asphalt */
-    --light-text-color: #58697a; /* Lighter Wet Asphalt/Silver mix */
-    --border-color: #bdc3c7; /* Silver */
-    --card-bg-color: #f8f9fa; /* Lightest background/cards */
-    --white-color: #ffffff;
-    --success-color: #2ecc71; /* Emerald */
-    --warning-color: #f39c12; /* Orange */
-    --error-color: #e74c3c; /* Alizarin (same as accent) */
-
-    --font-primary: 'Inter', sans-serif;
-    --font-secondary: 'Lora', serif;
-}
+/* 
+  CSS custom properties for colors and fonts have been removed.
+  These are now primarily managed by frontend/src/theme.js (for Chakra UI)
+  and frontend/tailwind.config.js (for Tailwind CSS).
+  Chakra UI theme provides these values to Chakra components, 
+  and Tailwind generates utility classes based on its configuration.
+*/
 
 body {
-    font-family: var(--font-primary);
-    color: var(--text-color);
-    background-color: var(--secondary-color);
-    line-height: 1.6;
-    font-size: 16px;
+    /* font-family, color, background-color are set by Chakra's global styles or Tailwind's base */
+    line-height: 1.6; /* General sensible default, can be overridden */
+    font-size: 16px; /* Base font size */
     display: flex;
     flex-direction: column;
     min-height: 100vh;

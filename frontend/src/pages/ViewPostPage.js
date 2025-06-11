@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link as RouterLink } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -14,9 +14,10 @@ import {
   Alert,
   AlertIcon,
   AlertTitle,
-  AlertDescription
+  AlertDescription,
+  Button // For retry or navigation
 } from '@chakra-ui/react';
-import { format } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import apiService from '../services/apiService';
 
 const ViewPostPage = () => {
@@ -24,37 +25,55 @@ const ViewPostPage = () => {
   const [post, setPost] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const fetchPost = useCallback(async () => {
+    if (!postId) return;
+    setIsLoading(true);
+    // setError(null); // Optional: clear previous error on retry
+    try {
+      const fetchedPostResponse = await apiService.getPostById(postId);
+      setPost(fetchedPostResponse.data);
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || err.message || 'Failed to fetch post. It might not exist or an error occurred.';
+      setError(errorMessage);
+      console.error(`Error fetching post ${postId}:`, err);
+      if (err.response?.status === 404) {
+        // Optionally, navigate to a custom 404 page or handle differently
+      }
+    }
+    setIsLoading(false);
+  }, [postId]);
 
   useEffect(() => {
-    const fetchPost = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const fetchedPost = await apiService.getPostById(postId);
-        setPost(fetchedPost);
-      } catch (err) {
-        setError(err.response?.data?.detail || err.message || 'Failed to fetch post. It might not exist or an error occurred.');
-        console.error(`Error fetching post ${postId}:`, err);
-      }
-      setIsLoading(false);
-    };
+    fetchPost();
+  }, [fetchPost]);
 
-    if (postId) {
-      fetchPost();
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Date not available';
+    try {
+      const date = parseISO(dateString);
+      if (isValid(date)) {
+        return format(date, 'MMMM dd, yyyy');
+      }
+      return dateString; // Fallback for non-ISO or invalid dates
+    } catch (e) {
+      console.error('Error formatting date:', e);
+      return dateString;
     }
-  }, [postId]);
+  };
 
   if (isLoading) {
     return (
-      <Center minH="calc(100vh - 200px)"> {/* Adjust height based on header/footer */}
-        <Spinner size="xl" color="brand.primary" thickness="4px" />
+      <Center minH="calc(100vh - 200px)">
+        <Spinner size="xl" color="primary" thickness="4px" />
       </Center>
     );
   }
 
   if (error) {
     return (
-      <Container maxW="container.md" py={{ base: '1rem', md: '2rem' }} textAlign="center">
+      <Container maxW="container.md" py={{ base: '1rem', md: '2rem' }}>
          <Alert 
             status="error" 
             variant="subtle"
@@ -74,74 +93,80 @@ const ViewPostPage = () => {
             <AlertDescription maxWidth="md">
               {error}
             </AlertDescription>
-            <ChakraLink as={RouterLink} to="/" color="brand.primary" fontWeight="500" mt={6} _hover={{ textDecoration: 'underline' }}>
+            <Button colorScheme="primary" mt={6} onClick={() => navigate('/')} mr={2}>
               &larr; Back to Blog List
-            </ChakraLink>
+            </Button>
+            <Button colorScheme="gray" mt={6} onClick={fetchPost} isLoading={isLoading}>
+              Try Again
+            </Button>
           </Alert>
       </Container>
     );
   }
 
   if (!post) {
+    // This case might be covered by error handling if API returns 404
+    // but good as a fallback if API returns 200 with no data.
     return (
       <Center minH="calc(100vh - 200px)">
-        <Text fontSize="xl" color="brand.lightText">Post not found.</Text>
+        <Text fontSize="xl" color="lightText">Post not found.</Text>
+        <Button as={RouterLink} to="/" colorScheme="primary" mt={4}> 
+            &larr; Back to Blog List
+        </Button>
       </Center>
     );
   }
 
   return (
     <Box as="main" flexGrow={1} py={{ base: '1rem', md: '2rem' }}>
-      <Container maxW="container.md" className="container">
-        <Box className="blog-post-container" bg="white" p={{ base: '1.5rem', md: '2.5rem' }} borderRadius="8px" boxShadow="0 4px 15px rgba(0,0,0,0.07)">
-          <VStack spacing={4} align="stretch">
+      <Container maxW="container.md">
+        <Box bg="white" p={{ base: '1.5rem', md: '2.5rem' }} borderRadius="8px" boxShadow="0 4px 15px rgba(0,0,0,0.07)">
+          <VStack spacing={5} align="stretch">
             <Heading 
               as="h1" 
-              className="post-title" 
               fontFamily="heading" 
               fontSize={{ base: '2.2rem', md: '2.8rem' }} 
               fontWeight="700"
-              color="brand.text" 
+              color="text"
               lineHeight="1.3"
             >
               {post.title}
             </Heading>
-            <Box className="post-meta" fontSize="0.9rem" color="brand.lightText" pb="1rem" mb="1.5rem">
+            <Box fontSize="0.9rem" color="lightText" pb={{base: "0.5rem", md: "1rem"}} mb={{base: "1rem", md: "1.5rem"}}>
               <Text as="span" mr="1rem">
-                By <Text as="strong">{post.owner?.username || 'Unknown Author'}</Text>
+                By <ChakraLink as={RouterLink} to={`/author/${post.owner?.id}`} color="primary" fontWeight="500">{post.owner?.username || 'Unknown Author'}</ChakraLink>
               </Text>
               <Text as="span">
                 Published on <Text as="time" dateTime={post.created_at}>
-                  {format(new Date(post.created_at), 'MMMM dd, yyyy')}
+                  {formatDate(post.created_at)}
                 </Text>
               </Text>
             </Box>
-            <Divider borderColor="brand.border" />
+            <Divider borderColor="border" />
             
             {post.image_url && (
               <Image 
                 src={post.image_url} 
-                alt={post.title} 
+                alt={`Featured image for ${post.title}`}
                 maxW="100%" 
                 h="auto" 
-                borderRadius="4px" 
-                my="1.5rem" 
-                boxShadow="0 2px 8px rgba(0,0,0,0.1)" 
+                borderRadius="md" 
+                my={{base: "1rem", md: "1.5rem"}} 
+                boxShadow="md" 
               />
             )}
-
-            {/* This is a simplified content rendering. For actual HTML content, you'd use dangerouslySetInnerHTML or a markdown parser */} 
-            <Box className="post-content" fontSize={{ base: '1rem', md: '1.1rem' }} lineHeight="1.7" color="brand.text">
-              {post.content.split('\n').map((paragraph, index) => (
+ 
+            <Box className="post-content" fontSize={{ base: '1rem', md: '1.1rem' }} lineHeight="1.8" color="text">
+              {post.content.split('\n').filter(p => p.trim() !== '').map((paragraph, index) => (
                 <Text key={index} mb="1.5em">
                   {paragraph}
                 </Text>
               ))}
             </Box>
 
-            <ChakraLink as={RouterLink} to="/" className="back-link" display="inline-block" mt="2.5rem" color="brand.primary" fontWeight="500" _hover={{ textDecoration: 'underline' }}>
+            <Button as={RouterLink} to="/" colorScheme="primary" variant="outline" mt={{base: "2rem", md: "2.5rem"}} alignSelf="flex-start">
               &larr; Back to Blog List
-            </ChakraLink>
+            </Button>
           </VStack>
         </Box>
       </Container>

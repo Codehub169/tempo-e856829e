@@ -13,23 +13,23 @@ const RegisterPage = () => {
       align="center"
       justify="center"
       width="100%"
-      // py={10} // App.js <Box as="main"> already has py={8}
-      flexGrow={1} // Ensure it takes up space if content is short
+      flexGrow={1} // Ensures the Flex container takes up available vertical space
+      py={{ base: '1rem', md: '2rem' }} // Consistent padding with other pages
     >
-      <Container maxW="480px">
+      <Container maxW="480px"> {/* Max width slightly larger for register form potentially */}
         <Box
-          bg={'white'}
+          bg={'white'} // Uses direct color key from theme or default white
           p={{ base: 6, sm: 8, md: 10 }} // Responsive padding
-          borderRadius="lg" // theme.radii.lg
-          boxShadow="xl" // theme.shadows.xl
+          borderRadius="lg" 
+          boxShadow="xl" 
         >
           <Heading
             as="h1"
-            fontFamily='heading' // From theme: Lora
-            fontSize={{ base: "xl", md: "2xl" }} // Matches 'page-title' style from register.html
-            color='brand.text' // From theme
+            fontFamily='heading' // Uses font key from theme
+            fontSize={{ base: "xl", md: "2xl" }} // Responsive font size
+            color='text' // Uses color key from theme
             textAlign="center"
-            mb={{ base: 6, md: 8}} // Responsive margin
+            mb={{ base: 6, md: 8}} // Responsive margin bottom
           >
             Create Your Account
           </Heading>

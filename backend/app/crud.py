@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
 from .auth import get_password_hash # Assuming auth.py will have this utility
-from typing import List, Optional, Type
+from typing import List, Optional
 
 # --- User CRUD Operations ---
 
@@ -17,7 +17,7 @@ def get_user_by_username(db: Session, username: str) -> Optional[models.User]:
     """Retrieve a single user by their username."""
     return db.query(models.User).filter(models.User.username == username).first()
 
-def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[Type[models.User]]:
+def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[models.User]: # Corrected: Type hint
     """Retrieve a list of users with pagination."""
     return db.query(models.User).offset(skip).limit(limit).all()
 
@@ -60,13 +60,13 @@ def get_post(db: Session, post_id: int) -> Optional[models.Post]:
     """Retrieve a single post by its ID."""
     return db.query(models.Post).filter(models.Post.id == post_id).first()
 
-def get_posts(db: Session, skip: int = 0, limit: int = 100) -> List[Type[models.Post]]:
+def get_posts(db: Session, skip: int = 0, limit: int = 100) -> List[models.Post]: # Corrected: Type hint
     """Retrieve a list of posts with pagination, ordered by creation date descending."""
     return db.query(models.Post).order_by(models.Post.created_at.desc()).offset(skip).limit(limit).all()
 
-def get_posts_by_user(db: Session, user_id: int, skip: int = 0, limit: int = 100) -> List[Type[models.Post]]:
+def get_posts_by_user(db: Session, owner_id: int, skip: int = 0, limit: int = 100) -> List[models.Post]: # Corrected: Parameter name and Type hint
     """Retrieve posts for a specific user with pagination."""
-    return db.query(models.Post).filter(models.Post.owner_id == user_id).order_by(models.Post.created_at.desc()).offset(skip).limit(limit).all()
+    return db.query(models.Post).filter(models.Post.owner_id == owner_id).order_by(models.Post.created_at.desc()).offset(skip).limit(limit).all()
 
 def create_post(db: Session, post: schemas.PostCreate, owner_id: int) -> models.Post:
     """Create a new post for a given user."""
@@ -87,8 +87,8 @@ def update_post(db: Session, db_post: models.Post, post_in: schemas.PostUpdate) 
     db.refresh(db_post)
     return db_post
 
-def delete_post(db: Session, db_post: models.Post) -> models.Post:
+def delete_post(db: Session, db_post: models.Post) -> models.Post: # Corrected: Parameter name to db_post
     """Delete a post. Assumes ownership check is done prior to calling."""
     db.delete(db_post)
     db.commit()
-    return db_post # The object is still in memory until the session is closed/expunged
+    return db_post

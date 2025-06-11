@@ -1,20 +1,27 @@
 import React from 'react';
 import { Box, Text, Link as ChakraLink, Button, Image, useColorModeValue, VStack, Heading, Spacer } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
-import { format } from 'date-fns'; // For date formatting
+import { format, isValid, parseISO } from 'date-fns'; // For date formatting
 
 const BlogPostCard = ({ post }) => {
-  const cardBgColor = useColorModeValue('brand.cardBg', 'gray.700');
-  const textColor = useColorModeValue('brand.text', 'whiteAlpha.900');
-  const lightTextColor = useColorModeValue('brand.lightText', 'gray.400');
-  const headingColor = useColorModeValue('brand.text', 'whiteAlpha.900');
-  const primaryColor = useColorModeValue('brand.primary', 'brand.primary');
+  const cardBgColor = useColorModeValue('cardBg', 'gray.700'); 
+  const textColorVal = useColorModeValue('text', 'whiteAlpha.900');
+  const lightTextColorVal = useColorModeValue('lightText', 'gray.400');
+  const headingColorVal = useColorModeValue('text', 'whiteAlpha.900');
+  const primaryColorVal = useColorModeValue('primary', 'primary');
+  const placeholderImageTextColor = useColorModeValue('gray.600', 'gray.300');
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'Date not available';
     try {
-      return format(new Date(dateString), 'MMMM dd, yyyy');
+      const date = parseISO(dateString); // Handles ISO strings more robustly
+      if (isValid(date)) {
+        return format(date, 'MMMM dd, yyyy');
+      }
+      return dateString; // Fallback for non-ISO or invalid dates
     } catch (error) {
-      return dateString; // Fallback if date is not valid
+      console.error('Error formatting date:', error);
+      return dateString; // Fallback if date parsing/formatting fails
     }
   };
 
@@ -27,16 +34,17 @@ const BlogPostCard = ({ post }) => {
       overflow="hidden"
       display="flex"
       flexDirection="column"
-      transition="transform 0.3s ease, box-shadow 0.3s ease"
+      transition="transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out"
       _hover={{
-        transform: 'translateY(-5px)',
+        transform: 'translateY(-4px)',
         boxShadow: 'xl',
       }}
+      height="100%" // Ensure cards in a grid have consistent height behavior
     >
       {post.image_url ? (
         <Image 
           src={post.image_url} 
-          alt={`Image for ${post.title}`} 
+          alt={`Image for ${post.title}`}
           width="100%" 
           height="200px" 
           objectFit="cover" 
@@ -45,42 +53,46 @@ const BlogPostCard = ({ post }) => {
         <Box 
           width="100%" 
           height="200px" 
-          bg="gray.300" 
+          bg={useColorModeValue('gray.200', 'gray.600')} 
           display="flex" 
           alignItems="center" 
           justifyContent="center"
-          color="white"
-          fontSize="1.2rem"
+          color={placeholderImageTextColor}
+          fontSize="1.1rem"
           fontFamily="heading"
+          textAlign="center"
+          p={2}
         >
           Featured Image
         </Box>
       )}
 
-      <VStack spacing={3} p={6} align="stretch" flexGrow={1}>
+      <VStack spacing={3} p={6} align="stretch" flexGrow={1} display="flex" flexDirection="column">
         <Heading 
           as={RouterLink} 
           to={`/post/${post.id}`} 
           fontFamily="heading" 
           fontSize="xl" 
           fontWeight="600" 
-          color={headingColor}
-          _hover={{ color: primaryColor, textDecoration: 'none' }}
+          color={headingColorVal}
+          _hover={{ color: primaryColorVal, textDecoration: 'none' }}
+          noOfLines={2} // Prevent very long titles from breaking layout
         >
           {post.title}
         </Heading>
-        <Text fontSize="sm" color={lightTextColor}>
+        <Text fontSize="sm" color={lightTextColorVal}>
           By {post.owner?.username || 'Unknown Author'} on {formatDate(post.created_at)}
         </Text>
-        <Text fontSize="md" color={textColor} flexGrow={1} noOfLines={3}>
-          {post.content.substring(0, 150)}{post.content.length > 150 ? '...' : ''}
+        <Text fontSize="md" color={textColorVal} flexGrow={1} noOfLines={3}>
+          {post.content ? (post.content.substring(0, 150) + (post.content.length > 150 ? '...' : '')) : 'No content preview available.'}
         </Text>
         <Spacer />
         <Button 
           as={RouterLink} 
           to={`/post/${post.id}`} 
-          colorScheme="brandPrimary" 
+          colorScheme="primary"
           alignSelf="flex-start"
+          mt={2} // Add some margin top if needed
         >
           Read More
         </Button>

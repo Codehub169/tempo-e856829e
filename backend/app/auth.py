@@ -6,13 +6,13 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
 from app.database import get_db
 
-# Environment variables (consider a dedicated config.py for larger apps)
+# Environment variables
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-for-dev-only-change-in-prod")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
@@ -20,9 +20,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/users/token")
-
-class TokenData(BaseModel):
-    username: Optional[str] = None
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifies a plain password against a hashed password."""
@@ -43,11 +40,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def authenticate_user(db: Session, username: str, password: str) -> Optional[models.User]:
-    """Authenticates a user by username and password."""
-    user = crud.get_user_by_username(db, username=username)
+def authenticate_user(db: Session, username_or_email: str, password: str) -> Optional[models.User]:
+    """Authenticates a user by username or email and password."""
+    user = crud.get_user_by_username(db, username=username_or_email)
     if not user:
-        user = crud.get_user_by_email(db, email=username) # Allow login with email
+        user = crud.get_user_by_email(db, email=username_or_email)
+    
     if not user:
         return None
     if not verify_password(password, user.hashed_password):
@@ -63,15 +61,19 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Se
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: Optional[str] = payload.get("sub")
-        if username is None:
+        subject: Optional[str] = payload.get("sub")
+        if subject is None: # 'sub' claim is essential
             raise credentials_exception
-        token_data = schemas.TokenPayload(username=username) # Use Pydantic schema for validation
-    except (JWTError, ValidationError):
+        # Validate the structure of the subject claim, though it's simple here
+        token_data = schemas.TokenPayload(sub=subject) 
+    except (JWTError, ValidationError): # Catch JWT errors or Pydantic validation errors
         raise credentials_exception
     
-    user = crud.get_user_by_username(db, username=token_data.username)
+    # Fetch user based on 'sub' (username) from token payload
+    user = crud.get_user_by_username(db, username=token_data.sub) 
     if user is None:
+        # This case should ideally not happen if tokens are generated for valid users
+        # and 'sub' correctly maps to a username.
         raise credentials_exception
     return user
 

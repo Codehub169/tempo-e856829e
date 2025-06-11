@@ -73,5 +73,6 @@ class Token(BaseModel):
     token_type: str
 
 class TokenPayload(BaseModel):
-    sub: Optional[str] = None # 'sub' is standard for subject (username or user_id)
+    # Corrected: sub is standard for subject (username or user_id)
+    sub: Optional[str] = None 
     # Add any other claims you want in the token payload

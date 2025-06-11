@@ -25,10 +25,14 @@ pip install -r backend/requirements.txt
 if [ -d "frontend" ] && [ -f "frontend/package.json" ]; then
   echo "Setting up frontend..."
   cd frontend
-  # Check for npm, install if not present (basic check, might need improvement for specific OS)
-  if ! command -v npm &> /dev/null
+  # Check for Node.js and npm
+  if ! command -v node &> /dev/null
   then
-      echo "npm could not be found, please install Node.js and npm."
+      echo "Node.js could not be found, please install Node.js."
+      # exit 1 # Optionally exit if Node.js is critical and not found
+  elif ! command -v npm &> /dev/null
+  then
+      echo "npm could not be found, please install npm (usually comes with Node.js)."
       # exit 1 # Optionally exit if npm is critical and not found
   else 
       echo "Installing frontend dependencies..."
@@ -42,13 +46,12 @@ else
   echo "Ensure frontend is set up with a 'build' script in package.json for full functionality."
 fi
 
-# Run database migrations (Alembic)
-# This command should be enabled once Alembic is configured.
+# Run database migrations (Alembic) - Kept commented as per original intent for now.
+# The application itself will handle initial table creation if Alembic is not used.
 # echo "Running database migrations..."
 # alembic upgrade head
-# For now, initial DB setup (table creation) will be handled by the application code on startup.
 
 echo "Starting FastAPI application on port 9000..."
 # Run Uvicorn server, accessible on the network
-# The --reload flag is useful for development but should be removed for production.
-uvicorn backend.app.main:app --host 0.0.0.0 --port 9000 --reload
+# --reload flag removed for production suitability.
+uvicorn backend.app.main:app --host 0.0.0.0 --port 9000
