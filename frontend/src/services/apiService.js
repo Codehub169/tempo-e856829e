@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || '/api';
+const API_URL = process.env.REACT_APP_API_URL || '/api/v1';
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -40,11 +40,11 @@ export const getCurrentUser = async () => {
 };
 
 export const createPost = async (postData) => { // { title, content, image_url? }
-  return apiClient.post('/posts/', postData);
+  return apiClient.post('/posts/', postData); // Path matches backend: /api/v1/posts/
 };
 
 export const getPosts = async (page = 1, limit = 10) => {
-  return apiClient.get('/posts/', { params: { skip: (page - 1) * limit, limit: limit } });
+  return apiClient.get('/posts/', { params: { skip: (page - 1) * limit, limit: limit } }); // Path matches backend: /api/v1/posts/
 };
 
 export const getPostById = async (postId) => {
@@ -59,6 +59,9 @@ export const deletePost = async (postId) => {
   return apiClient.delete(`/posts/${postId}`);
 };
 
+// Consolidating all functions into a single default export object is a common pattern.
+// Alternatively, each function could be a named export without this additional object.
+// The current approach is fine.
 const apiService = {
   loginUser,
   registerUser,
